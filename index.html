@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lotofácil — Análise Probabilística</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+  <h1>🎯 Lotofácil — Análise Probabilística</h1>
+  <p class="subtitle">
+    Ferramenta educacional. Em loteria uniforme a média de acertos é <strong>9,00</strong>.
+    Nenhum método histórico supera isso de forma consistente.
+  </p>
+</header>
+
+<main>
+
+  <!-- 1. DADOS -->
+  <section class="card">
+    <h2>1. Dados</h2>
+    <div class="row">
+      <label for="csv-url">URL pública (raw) do CSV:</label>
+      <input type="url" id="csv-url"
+             value="https://raw.githubusercontent.com/jonatasandrade8/DATASUS/main/lotofacil-download-resultados.csv"
+             placeholder="https://raw.githubusercontent.com/.../lotofacil.csv">
+      <button id="load-url">Carregar</button>
+    </div>
+    <div class="row">
+      <label for="csv-file">Ou envie o arquivo:</label>
+      <input type="file" id="csv-file" accept=".csv,.tsv,.txt,text/csv">
+      <button id="load-demo">Usar demo (100 concursos)</button>
+    </div>
+    <div id="data-status" class="status">Nenhum dado carregado.</div>
+  </section>
+
+  <!-- 2. ÚLTIMO JOGO -->
+  <section class="card">
+    <h2>2. Último jogo</h2>
+    <p class="small">Clique nas 15 dezenas sorteadas no concurso mais recente.</p>
+    <div id="last-game-grid" class="number-grid"></div>
+    <div class="row">
+      <span>Selecionados: <strong id="selected-count">0</strong>/15</span>
+      <button id="clear-selection">Limpar</button>
+      <button id="auto-last">Usar último da base</button>
+    </div>
+  </section>
+
+  <!-- 3. CONFIGURAÇÃO -->
+  <section class="card">
+    <h2>3. Configuração</h2>
+    <div class="row">
+      <label for="trigger-select">Condicionamento:</label>
+      <select id="trigger-select">
+        <option value="q1" selected>Q1 do último jogo (1–5)</option>
+        <option value="none">Nenhum — frequência marginal</option>
+        <option value="all-q1">Todos os Q1 (1–5)</option>
+      </select>
+    </div>
+    <div class="row">
+      <label for="n-pick">Quantidade a receber:</label>
+      <input type="range" id="n-pick" min="10" max="15" value="15" step="1">
+      <strong id="n-pick-value">15</strong>
+    </div>
+    <div class="row">
+      <button id="analyze" class="primary" disabled>Analisar</button>
+    </div>
+    <p id="perf-note" class="small" style="display:none">
+      ⚙️ Banco completo: o cálculo pode levar um instante na primeira execução.
+    </p>
+  </section>
+
+  <!-- 4. RESULTADOS -->
+  <section id="results-section" class="card" style="display:none">
+    <h2>4. Resultados</h2>
+    <div id="results-summary" class="summary"></div>
+
+    <div class="chart-container">
+      <h3>Probabilidade de cada dezena sair</h3>
+      <p class="small">Cores quentes = maior probabilidade. Contorno branco = está na recomendação.</p>
+      <div id="heatmap" class="heatmap"></div>
+    </div>
+
+    <div class="chart-container">
+      <h3>Top 15 mais prováveis</h3>
+      <div id="bar-chart" class="bar-chart"></div>
+    </div>
+
+    <div class="recommendation">
+      <h3>Recomendação — <span id="rec-count">15</span> dezenas</h3>
+      <div id="recommendation-grid" class="number-grid highlight"></div>
+      <div class="stats-grid">
+        <div class="stat">
+          <div class="stat-label">Probabilidade média por dezena</div>
+          <div class="stat-value" id="avg-prob">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Acertos esperados</div>
+          <div class="stat-value" id="expected-hits">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">P(≥11 acertos)</div>
+          <div class="stat-value" id="p11">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">P(≥12 acertos)</div>
+          <div class="stat-value" id="p12">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">P(≥13 acertos)</div>
+          <div class="stat-value" id="p13">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <h3>Distribuição histórica de acertos</h3>
+      <p class="small">
+        Para cada concurso passado em que o gatilho se repetiu, contamos quantas
+        das <span id="n-pick-dist">15</span> dezenas recomendadas estavam no sorteio.
+        Compare com a distribuição hipergeométrica teórica (média 9,00).
+      </p>
+      <div id="dist-chart" class="dist-chart"></div>
+    </div>
+
+    <div class="caveat">
+      ⚠️ <strong>Aviso:</strong> as dezenas do gatilho aparecem com ~100% de probabilidade
+      <em>condicional</em> porque estamos condicionando à presença delas. Para o próximo
+      concurso o gatilho pode <strong>não</strong> se repetir. Em loteria uniforme, o valor
+      esperado de qualquer conjunto fixo de 15 dezenas é 9,00 acertos.
+    </div>
+  </section>
+
+</main>
+
+<footer>⚠️ Jogue com responsabilidade. Projeto educacional.</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
