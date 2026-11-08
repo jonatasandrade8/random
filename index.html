@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lotofácil — Análise Probabilística</title>
+<title>Lotofácil — Análise, Quadrantes e Teste de Predição</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <header>
-  <h1>🎯 Lotofácil — Análise Probabilística</h1>
+  <h1>🎯 Lotofácil — Análise Probabilística + Teste de Predição</h1>
   <p class="subtitle">
-    Ferramenta educacional. Em loteria uniforme a média de acertos é <strong>9,00</strong>.
-    Nenhum método histórico supera isso de forma consistente.
+    Ferramenta educacional. A média de acertos em loteria uniforme é <strong>9,00 por jogo</strong>.
+    Use o teste de escala para ver <strong>com seus próprios olhos</strong> se alguma estratégia supera o acaso.
   </p>
 </header>
 
@@ -24,8 +24,7 @@
     <div class="row">
       <label for="csv-url">URL pública (raw) do CSV:</label>
       <input type="url" id="csv-url"
-             value="https://raw.githubusercontent.com/jonatasandrade8/DATASUS/main/lotofacil-download-resultados.csv"
-             placeholder="https://raw.githubusercontent.com/.../lotofacil.csv">
+             value="https://raw.githubusercontent.com/jonatasandrade8/DATASUS/main/lotofacil-download-resultados.csv">
       <button id="load-url">Carregar</button>
     </div>
     <div class="row">
@@ -36,9 +35,29 @@
     <div id="data-status" class="status">Nenhum dado carregado.</div>
   </section>
 
-  <!-- 2. ÚLTIMO JOGO -->
+  <!-- 2. MAPA DE CALOR POR QUADRANTES -->
+  <section id="quadrant-section" class="card" style="display:none">
+    <h2>2. Mapa de calor por quadrantes (histórico)</h2>
+    <p class="small">
+      Cada quadrante tem 5 dezenas. A cor mostra a <strong>média histórica de dezenas sorteadas</strong> por concurso.
+      Cores quentes = mais dezenas saindo historicamente. Abaixo, compare com a <em>referência matemática</em> (3,00 por quadrante).
+    </p>
+    <div id="quadrant-grid" class="quadrant-grid"></div>
+    <div id="quadrant-theory" class="quadrant-theory"></div>
+
+    <div class="chart-container">
+      <h3>Distribuição observada × teórica</h3>
+      <p class="small">
+        Barra sólida = observado no histórico. Barra transparente = esperado por sorteio aleatório.
+        Se as barras ficam próximas, o quadrante se comporta como o esperado.
+      </p>
+      <div id="quadrant-dist"></div>
+    </div>
+  </section>
+
+  <!-- 3. ÚLTIMO JOGO -->
   <section class="card">
-    <h2>2. Último jogo</h2>
+    <h2>3. Último jogo</h2>
     <p class="small">Clique nas 15 dezenas sorteadas no concurso mais recente.</p>
     <div id="last-game-grid" class="number-grid"></div>
     <div class="row">
@@ -48,15 +67,15 @@
     </div>
   </section>
 
-  <!-- 3. CONFIGURAÇÃO -->
+  <!-- 4. ANÁLISE TOP-N -->
   <section class="card">
-    <h2>3. Configuração</h2>
+    <h2>4. Análise: dezenas mais prováveis</h2>
     <div class="row">
       <label for="trigger-select">Condicionamento:</label>
       <select id="trigger-select">
-        <option value="q1" selected>Q1 do último jogo (1–5)</option>
-        <option value="none">Nenhum — frequência marginal</option>
-        <option value="all-q1">Todos os Q1 (1–5)</option>
+        <option value="q1" selected>Dezenas 1–5 do último jogo</option>
+        <option value="none">Nenhum — frequência histórica</option>
+        <option value="all-q1">Todas as dezenas 1–5</option>
       </select>
     </div>
     <div class="row">
@@ -72,9 +91,9 @@
     </p>
   </section>
 
-  <!-- 4. RESULTADOS -->
+  <!-- 5. RESULTADOS DA ANÁLISE -->
   <section id="results-section" class="card" style="display:none">
-    <h2>4. Resultados</h2>
+    <h2>5. Resultados da análise</h2>
     <div id="results-summary" class="summary"></div>
 
     <div class="chart-container">
@@ -92,50 +111,115 @@
       <h3>Recomendação — <span id="rec-count">15</span> dezenas</h3>
       <div id="recommendation-grid" class="number-grid highlight"></div>
       <div class="stats-grid">
-        <div class="stat">
-          <div class="stat-label">Probabilidade média por dezena</div>
-          <div class="stat-value" id="avg-prob">—</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Acertos esperados</div>
-          <div class="stat-value" id="expected-hits">—</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">P(≥11 acertos)</div>
-          <div class="stat-value" id="p11">—</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">P(≥12 acertos)</div>
-          <div class="stat-value" id="p12">—</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">P(≥13 acertos)</div>
-          <div class="stat-value" id="p13">—</div>
-        </div>
+        <div class="stat"><div class="stat-label">Probabilidade média por dezena</div><div class="stat-value" id="avg-prob">—</div></div>
+        <div class="stat"><div class="stat-label">Acertos esperados</div><div class="stat-value" id="expected-hits">—</div></div>
+        <div class="stat"><div class="stat-label">P(≥11 acertos)</div><div class="stat-value" id="p11">—</div></div>
+        <div class="stat"><div class="stat-label">P(≥12 acertos)</div><div class="stat-value" id="p12">—</div></div>
+        <div class="stat"><div class="stat-label">P(≥13 acertos)</div><div class="stat-value" id="p13">—</div></div>
       </div>
     </div>
 
     <div class="chart-container">
       <h3>Distribuição histórica de acertos</h3>
-      <p class="small">
-        Para cada concurso passado em que o gatilho se repetiu, contamos quantas
-        das <span id="n-pick-dist">15</span> dezenas recomendadas estavam no sorteio.
-        Compare com a distribuição hipergeométrica teórica (média 9,00).
-      </p>
+      <p class="small">Para concursos passados em que o gatilho se repetiu, quantas das <span id="n-pick-dist">15</span> dezenas recomendadas caíram.</p>
       <div id="dist-chart" class="dist-chart"></div>
     </div>
 
     <div class="caveat">
-      ⚠️ <strong>Aviso:</strong> as dezenas do gatilho aparecem com ~100% de probabilidade
-      <em>condicional</em> porque estamos condicionando à presença delas. Para o próximo
-      concurso o gatilho pode <strong>não</strong> se repetir. Em loteria uniforme, o valor
-      esperado de qualquer conjunto fixo de 15 dezenas é 9,00 acertos.
+      ⚠️ As dezenas do gatilho aparecem com ~100% de probabilidade <em>condicional</em> porque estamos condicionando à presença delas. Para o próximo concurso o gatilho pode <strong>não</strong> se repetir.
+    </div>
+  </section>
+
+  <!-- 6. MÚLTIPLOS JOGOS -->
+  <section class="card">
+    <h2>6. Gerar vários jogos e simular concursos consecutivos</h2>
+    <p class="small">
+      Gera <strong>X jogos diversificados</strong> (sobreposição controlada) e simula jogá-los por
+      <strong>M concursos</strong>, estimando a chance de ganhar algo.
+    </p>
+    <div class="row">
+      <label for="strategy-select">Estratégia:</label>
+      <select id="strategy-select">
+        <option value="condicional">Condicional (dezenas 1–5 do último)</option>
+        <option value="marginal">Frequência histórica</option>
+        <option value="balanceada">Cobertura balanceada</option>
+        <option value="aleatorio">Aleatória (baseline)</option>
+      </select>
+    </div>
+    <div class="row">
+      <label for="n-games">Jogos (X):</label>
+      <input type="range" id="n-games" min="1" max="30" value="5" step="1">
+      <strong id="n-games-value">5</strong>
+    </div>
+    <div class="row">
+      <label for="n-draws">Concursos consecutivos (M):</label>
+      <input type="range" id="n-draws" min="1" max="100" value="10" step="1">
+      <strong id="n-draws-value">10</strong>
+    </div>
+    <div class="row">
+      <label for="seed">Semente (para reprodutibilidade):</label>
+      <input type="number" id="seed" value="42" style="max-width:120px">
+    </div>
+    <div class="row">
+      <button id="generate-games" class="primary" disabled>Gerar jogos & simular</button>
+    </div>
+
+    <div id="games-section" style="display:none">
+      <div id="games-summary" class="summary"></div>
+      <p class="small" id="games-coverage">—</p>
+      <div id="games-list" class="games-list"></div>
+      <div class="chart-container">
+        <h3>Simulação: jogar esses <span id="sim-m">10</span> concursos</h3>
+        <div class="stats-grid">
+          <div class="stat"><div class="stat-label">Chance de prêmio em 1 concurso</div><div class="stat-value" id="sim-p1">—</div></div>
+          <div class="stat"><div class="stat-label">Chance de prêmio em M concursos</div><div class="stat-value" id="sim-pM">—</div></div>
+          <div class="stat"><div class="stat-label">Retorno esperado por concurso</div><div class="stat-value" id="sim-ev">—</div></div>
+          <div class="stat"><div class="stat-label">Custo total</div><div class="stat-value" id="sim-cost">—</div></div>
+          <div class="stat"><div class="stat-label">Acertos médios por jogo</div><div class="stat-value" id="sim-mean">—</div></div>
+        </div>
+        <h3 style="margin-top:1.5rem">Distribuição esperada de acertos</h3>
+        <div id="sim-dist" class="dist-chart"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. TESTE DE ESCALA -->
+  <section class="card">
+    <h2>7. Teste: "o jogo sugerido acerta mais que o acaso?"</h2>
+    <p class="small">
+      Aqui é o teste honesto: para cada concurso passado, o sistema gera <strong>X jogos com a estratégia</strong>
+      e <strong>X jogos aleatórios</strong> (mesma semente), e compara os acertos. O teste é feito em
+      <strong>várias escalas</strong> (1, 2, 3, 5, 10, 20, 50 jogos) para ver se o efeito aparece em alguma.
+    </p>
+
+    <div class="row">
+      <label for="st-start">Começar do concurso (índice):</label>
+      <input type="number" id="st-start" min="100" value="1000" style="max-width:140px">
+      <span class="small">(para base completa ~3800, use 1000–1500)</span>
+    </div>
+    <div class="row">
+      <label for="st-seed">Semente:</label>
+      <input type="number" id="st-seed" value="42" style="max-width:120px">
+    </div>
+    <div class="row">
+      <label>
+        <input type="checkbox" id="st-shuffle">
+        <strong>Modo controle</strong> (embaralha números — deve dar "sem sinal")
+      </label>
+    </div>
+    <div class="row">
+      <button id="run-scale-test" class="primary" disabled>Rodar teste de escala</button>
+    </div>
+    <p id="scale-summary" class="small"></p>
+
+    <div id="scale-section" style="display:none">
+      <div id="scale-results"></div>
     </div>
   </section>
 
 </main>
 
-<footer>⚠️ Jogue com responsabilidade. Projeto educacional.</footer>
+<footer>⚠️ Jogue com responsabilidade. Projeto educacional. Nenhum método supera a aleatoriedade da Lotofácil.</footer>
 
 <script src="app.js"></script>
 </body>
